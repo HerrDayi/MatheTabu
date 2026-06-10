@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathe-Tabu: Geometrische Körper</title>
+    <style>
+        :root {
+            --primary: #2980b9;
+            --secondary: #34495e;
+            --accent: #e74c3c;
+            --success: #27ae60;
+            --bg: #f4f6f7;
+            --card-bg: #ffffff;
+            --text: #2c3e50;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 5px;
+            font-size: 2.2rem;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+
+        /* Spielregeln-Bereich */
+        .instructions {
+            background-color: #eaf2f8;
+            border-left: 5px solid var(--primary);
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            max-width: 600px;
+            width: 100%;
+            line-height: 1.6;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .instructions h3 {
+            margin-top: 0;
+            color: var(--primary);
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .instructions p {
+            margin: 8px 0;
+            font-size: 0.95rem;
+        }
+
+        /* Spiel-Bereich */
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            margin-bottom: 20px;
+            border-top: 10px solid var(--primary);
+        }
+
+        .card-word {
+            font-size: 2.4rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 15px;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+        }
+
+        .graph-canvas {
+            display: block;
+            margin: 0 auto 20px auto;
+            background: #fdfefe;
+            border-radius: 8px;
+            border: 1px solid #e5e8e8;
+            max-width: 100%;
+        }
+
+        .taboo-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #95a5a6;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .taboo-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .taboo-list li {
+            font-size: 1.6rem;
+            color: var(--accent);
+            padding: 6px 0;
+            font-weight: 600;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            flex: 1;
+        }
+
+        button:hover {
+            background-color: var(--secondary);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button.btn-danger { background-color: var(--accent); }
+        button.btn-danger:hover { background-color: #c0392b; }
+        
+        button.btn-success { background-color: var(--success); }
+        button.btn-success:hover { background-color: #27ae60; }
+
+        /* Timer & Score */
+        .dashboard {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .score-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+        }
+
+        .team-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: var(--secondary);
+        }
+
+        .score-val {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin: 2px 0;
+        }
+
+        .score-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .score-controls button {
+            padding: 4px 14px;
+            font-size: 1.2rem;
+            flex: none;
+            border-radius: 5px;
+        }
+
+        .timer-box {
+            text-align: center;
+            flex: 1.2;
+            border-left: 2px solid #ecf0f1;
+            border-right: 2px solid #ecf0f1;
+            padding: 0 10px;
+        }
+
+        .timer-display {
+            font-size: 2.6rem;
+            font-weight: bold;
+            color: var(--secondary);
+            font-variant-numeric: tabular-nums;
+            margin: -5px 0 5px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>📦 Mathe-Tabu 📐</h1>
+    <p class="subtitle">Thema: Geometrische Körper (Klasse 5)</p>
+
+    <div class="instructions">
+        <h3>📋 So wird gespielt:</h3>
+        <p><strong>👥 Zu zweit:</strong> Spieler A beschreibt das obere Wort. Die roten Wörter auf der Karte sind <strong>streng verboten</strong>! Spieler B versucht das Wort zu erraten. Nach jeder Karte wird getauscht!</p>
+        <p><strong>🧑‍🤝‍🧑 Zu dritt:</strong> Spieler A erklärt, Spieler B rät. Spieler C ist der <strong>Schiedsrichter</strong>: Er schaut heimlich mit aufs Display und drückt auf Pause oder ruft laut "Tabu!", wenn ein verbotenes Wort aus Versehen gesagt wird!</p>
+        <p><strong>✏️ Für Schnelle:</strong> Erfindet im Heft eine eigene Tabu-Karte für einen Gegenstand aus dem Klassenzimmer!</p>
+    </div>
+
+    <div class="dashboard">
+        <div class="score-box">
+            <div class="team-name">Team A</div>
+            <div class="score-val" id="scoreA">0</div>
+            <div class="score-controls">
+                <button onclick="changeScore('A', 1)" style="background-color: var(--success);">+</button>
+                <button onclick="changeScore('A', -1)" style="background-color: var(--accent);">-</button>
+            </div>
+        </div>
+
+        <div class="timer-box">
+            <div style="font-size: 0.9rem; color: #7f8c8d; font-weight: bold;">ZEIT</div>
+            <div class="timer-display" id="timerDisplay">01:00</div>
+            <div class="score-controls" style="justify-content: center;">
+                <button onclick="startTimer()" class="btn-success">▶</button>
+                <button onclick="pauseTimer()">⏸</button>
+                <button onclick="resetTimer()" class="btn-danger">↺</button>
+            </div>
+        </div>
+
+        <div class="score-box">
+            <div class="team-name">Team B</div>
+            <div class="score-val" id="scoreB">0</div>
+            <div class="score-controls">
+                <button onclick="changeScore('B', 1)" style="background-color: var(--success);">+</button>
+                <button onclick="changeScore('B', -1)" style="background-color: var(--accent);">-</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="game-container">
+        <div class="card" id="activeCard">
+            <div class="card-word" id="wordDisplay">Lade...</div>
+            <canvas id="graphCanvas" width="300" height="150" class="graph-canvas"></canvas>
+            <div class="taboo-title">Diese Wörter darfst du nicht sagen:</div>
+            <ul class="taboo-list" id="tabooListDisplay">
+                </ul>
+        </div>
+
+        <div class="controls">
+            <button onclick="prevCard()">◀ Zurück</button>
+            <button onclick="shuffleCards()" style="background-color: #9b59b6;">🔀 Mischen</button>
+            <button onclick="nextCard()">Weiter ▶</button>
+        </div>
+    </div>
+
+    <script>
+        // --- Tabu-Karten für Klasse 5 ---
+        const defaultCards = [
+            { word: "Kugel", taboo: ["Ball", "rund", "Kreis", "rollen", "Erde"], graph: "kugel" },
+            { word: "Halbkugel", taboo: ["Kugel", "Hälfte", "rund", "schneiden", "Schüssel"], graph: "halbkugel" },
+            { word: "Zylinder", taboo: ["Dose", "Kreis", "rund", "Rohr", "Walze"], graph: "zylinder" },
+            { word: "Pyramide", taboo: ["Ägypten", "Spitze", "Dreieck", "Pharao", "eckig"], graph: "pyramide" },
+            { word: "Prisma", taboo: ["Dreieck", "Dach", "Grundfläche", "Körper", "Zelt"], graph: "prisma" },
+            { word: "Würfel", taboo: ["Quadrat", "Spiel", "sechs", "Augen", "Kiste"], graph: "wuerfel" },
+            { word: "Quader", taboo: ["Rechteck", "Karton", "Ziegelstein", "Schuhkarton", "lang"], graph: "quader" },
+            { word: "Ecke", taboo: ["Kante", "Punkt", "spitz", "stoßen", "Körper"], graph: "ecke" },
+            { word: "Kante", taboo: ["Ecke", "Linie", "Fläche", "gerade", "Begrenzung"], graph: "kante" },
+            { word: "Fläche", taboo: ["Kante", "eben", "flach", "Seite", "Wand"], graph: "flaeche" },
+            { word: "Oberfläche", taboo: ["außen", "einpacken", "Netz", "Flächeninhalt", "Haut"], graph: "oberflaeche" },
+            { word: "Volumen", taboo: ["Inhalt", "Raum", "Platz", "Liter", "füllen"], graph: "volumen" },
+            { word: "Volumeneinheiten", taboo: ["Liter", "Kubik", "hoch drei", "messen", "Einheit"], graph: "volumeneinheiten" },
+            { word: "Liter", taboo: ["Wasser", "Milch", "Flasche", "Flüssigkeit", "messen"], graph: "liter" }
+        ];
+
+        let cards = [];
+        let currentIndex = 0;
+        let scores = { A: 0, B: 0 };
+        let timeLeft = 60;
+        let timerInterval = null;
+
+        // --- Initialisierung ---
+        function init() {
+            cards = [...defaultCards];
+
+            // Scores laden
+            const savedScores = localStorage.getItem('tabuScoresKlasse5');
+            if (savedScores) {
+                scores = JSON.parse(savedScores);
+            }
+            updateScoreDisplay();
+
+            // Index laden
+            const savedIndex = localStorage.getItem('tabuIndexKlasse5');
+            if (savedIndex) {
+                currentIndex = parseInt(savedIndex);
+                if (currentIndex >= cards.length) currentIndex = 0;
+            }
+
+            renderCard();
+            updateTimerDisplay();
+        }
+
+        function saveScores() {
+            localStorage.setItem('tabuScoresKlasse5', JSON.stringify(scores));
+        }
+
+        function saveIndex() {
+            localStorage.setItem('tabuIndexKlasse5', currentIndex);
+        }
+
+        // --- Karten-Anzeige ---
+        function renderCard() {
+            if (cards.length === 0) return;
+            const currentCard = cards[currentIndex];
+            
+            document.getElementById('wordDisplay').innerText = currentCard.word;
+            
+            if (currentCard.graph) {
+                document.getElementById('graphCanvas').style.display = 'block';
+                drawSolid(currentCard.graph);
+            } else {
+                document.getElementById('graphCanvas').style.display = 'none';
+            }
+            
+            const tabooList = document.getElementById('tabooListDisplay');
+            tabooList.innerHTML = '';
+            currentCard.taboo.forEach(word => {
+                if (word.trim() !== '') {
+                    const li = document.createElement('li');
+                    li.innerText = word;
+                    tabooList.appendChild(li);
+                }
+            });
+            saveIndex();
+        }
+
+        // --- Skizzen auf dem Canvas zeichnen ---
+        function drawSolid(type) {
+            const canvas = document.getElementById('graphCanvas');
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+            const cx = w / 2;
+            const cy = h / 2;
+
+            ctx.clearRect(0, 0, w, h);
+            ctx.strokeStyle = '#34495e';
+            ctx.lineWidth = 2;
+            ctx.fillStyle = '#34495e';
+
+            switch (type) {
+                case 'kugel':
+                    ctx.beginPath(); ctx.arc(cx, cy, 40, 0, 2 * Math.PI); ctx.stroke();
+                    ctx.beginPath(); ctx.ellipse(cx, cy, 40, 15, 0, 0, 2 * Math.PI); ctx.setLineDash([4, 4]); ctx.stroke(); ctx.setLineDash([]);
+                    break;
+                case 'halbkugel':
+                    ctx.beginPath(); ctx.arc(cx, cy + 10, 40, Math.PI, 0); ctx.stroke();
+                    ctx.beginPath(); ctx.ellipse(cx, cy + 10, 40, 15, 0, 0, 2 * Math.PI); ctx.stroke();
+                    break;
+                case 'zylinder':
+                    ctx.beginPath(); ctx.ellipse(cx, cy - 30, 35, 12, 0, 0, 2 * Math.PI); ctx.stroke();
+                    ctx.beginPath(); ctx.ellipse(cx, cy + 30, 35, 12, 0, 0, Math.PI); ctx.stroke();
+                    ctx.beginPath(); ctx.ellipse(cx, cy + 30, 35, 12, 0, Math.PI, 2 * Math.PI); ctx.setLineDash([4, 4]); ctx.stroke(); ctx.setLineDash([]);
+                    ctx.beginPath(); ctx.moveTo(cx - 35, cy - 30); ctx.lineTo(cx - 35, cy + 30); ctx.moveTo(cx + 35, cy - 30); ctx.lineTo(cx + 35, cy + 30); ctx.stroke();
+                    break;
+                case 'pyramide':
+                    let topY = cy - 40;
+                    let b1x = cx - 45, b1y = cy + 25;
+                    let b2x = cx + 5, b2y = cy + 35;
+                    let b3x = cx + 45, b3y = cy + 15;
+                    let b4x = cx - 5, b4y = cy + 5;
+                    ctx.beginPath(); ctx.moveTo(cx, topY); ctx.lineTo(b1x, b1y); ctx.lineTo(b2x, b2y); ctx.lineTo(cx, topY); ctx.lineTo(b3x, b3y); ctx.lineTo(b2x, b2y); ctx.stroke();
+                    ctx.beginPath(); ctx.setLineDash([4, 4]); ctx.moveTo(b1x, b1y); ctx.lineTo(b4x, b4y); ctx.lineTo(b3x, b3y); ctx.moveTo(cx, topY); ctx.lineTo(b4x, b4y); ctx.stroke(); ctx.setLineDash([]);
+                    break;
+                case 'prisma':
+                    ctx.beginPath(); ctx.moveTo(cx - 40, cy - 20); ctx.lineTo(cx, cy - 40); ctx.lineTo(cx + 20, cy - 15); ctx.closePath(); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(cx - 40, cy + 30); ctx.lineTo(cx, cy + 10); ctx.moveTo(cx - 40, cy - 20); ctx.lineTo(cx - 40, cy + 30); ctx.moveTo(cx, cy - 40); ctx.lineTo(cx, cy + 10); ctx.moveTo(cx + 20, cy - 15); ctx.lineTo(cx + 20, cy + 35); ctx.stroke();
+                    ctx.beginPath(); ctx.setLineDash([4, 4]); ctx.moveTo(cx - 40, cy + 30); ctx.lineTo(cx + 20, cy + 35); ctx.lineTo(cx, cy + 10); ctx.stroke(); ctx.setLineDash([]);
+                    break;
+                case 'wuerfel':
+                    ctx.strokeRect(cx - 30, cy - 15, 45, 45);
+                    ctx.beginPath(); ctx.moveTo(cx - 30, cy - 15); ctx.lineTo(cx - 10, cy - 35); ctx.lineTo(cx + 35, cy - 35); ctx.lineTo(cx + 35, cy + 10); ctx.lineTo(cx + 15, cy + 30); ctx.moveTo(cx + 15, cy - 15); ctx.lineTo(cx + 35, cy - 35); ctx.stroke();
+                    ctx.beginPath(); ctx.setLineDash([4, 4]); ctx.moveTo(cx - 30, cy + 30); ctx.lineTo(cx - 10, cy + 10); ctx.lineTo(cx + 35, cy + 10); ctx.moveTo(cx - 10, cy - 35); ctx.lineTo(cx - 10, cy + 10); ctx.stroke(); ctx.setLineDash([]);
+                    break;
+                case 'quader':
+                    ctx.strokeRect(cx - 50, cy - 15, 80, 40);
+                    ctx.beginPath(); ctx.moveTo(cx - 50, cy - 15); ctx.lineTo(cx - 30, cy - 35); ctx.lineTo(cx + 50, cy - 35); ctx.lineTo(cx + 50, cy + 5); ctx.lineTo(cx + 30, cy + 25); ctx.moveTo(cx + 30, cy - 15); ctx.lineTo(cx + 50, cy - 35); ctx.stroke();
+                    ctx.beginPath(); ctx.setLineDash([4, 4]); ctx.moveTo(cx - 50, cy + 25); ctx.lineTo(cx - 30, cy + 5); ctx.lineTo(cx + 50, cy + 5); ctx.moveTo(cx - 30, cy - 35); ctx.lineTo(cx - 30, cy + 5); ctx.stroke(); ctx.setLineDash([]);
+                    break;
+                case 'ecke':
+                    ctx.strokeStyle = '#bdc3c7'; ctx.strokeRect(cx - 30, cy - 15, 50, 50);
+                    ctx.beginPath(); ctx.fillStyle = '#e74c3c'; ctx.arc(cx - 30, cy - 15, 6, 0, 2 * Math.PI); ctx.fill();
+                    ctx.fillStyle = '#e74c3c'; ctx.font = 'bold 12px sans-serif'; ctx.fillText('Hier spitz!', cx - 25, cy - 25);
+                    break;
+                case 'kante':
+                    ctx.strokeStyle = '#bdc3c7'; ctx.strokeRect(cx - 30, cy - 20, 60, 50);
+                    ctx.strokeStyle = '#e74c3c'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(cx - 30, cy - 20); ctx.lineTo(cx + 30, cy - 20); ctx.stroke();
+                    break;
+                case 'flaeche':
+                    ctx.fillStyle = '#fadbd8'; ctx.fillRect(cx - 40, cy - 25, 80, 50);
+                    ctx.strokeStyle = '#34495e'; ctx.strokeRect(cx - 40, cy - 25, 80, 50);
+                    break;
+                case 'oberflaeche':
+                    // Einfaches Würfelnetz
+                    let s = 20;
+                    ctx.strokeRect(cx - s/2, cy - s*1.5, s, s);
+                    ctx.strokeRect(cx - s/2, cy - s/2, s, s);
+                    ctx.strokeRect(cx - s*1.5, cy - s/2, s, s);
+                    ctx.strokeRect(cx + s/2, cy - s/2, s, s);
+                    ctx.strokeRect(cx - s/2, cy + s/2, s, s);
+                    ctx.strokeRect(cx - s/2, cy + s*1.5, s, s);
+                    break;
+                case 'volumen':
+                    ctx.fillStyle = '#d4e6f1'; ctx.fillRect(cx - 40, cy - 10, 80, 40);
+                    ctx.strokeRect(cx - 40, cy - 10, 80, 40);
+                    ctx.fillStyle = '#2980b9'; ctx.font = '14px sans-serif'; ctx.fillText('Wie viel passt rein?', cx - 55, cy - 20);
+                    break;
+                case 'volumeneinheiten':
+                    ctx.fillStyle = '#27ae60'; ctx.font = 'bold 20px sans-serif';
+                    ctx.fillText('mm³   cm³   dm³   m³', cx - 85, cy + 10);
+                    break;
+                case 'liter':
+                    // Messbecher-Skizze
+                    ctx.beginPath(); ctx.moveTo(cx - 25, cy - 35); ctx.lineTo(cx - 20, cy + 35); ctx.lineTo(cx + 20, cy + 35); ctx.lineTo(cx + 25, cy - 35); ctx.stroke();
+                    ctx.fillStyle = '#3498db'; ctx.fillRect(cx - 21, cy + 5, 42, 29); // Wasserstand
+                    ctx.strokeStyle = '#e74c3c'; ctx.beginPath(); ctx.moveTo(cx + 10, cy - 15); ctx.lineTo(cx + 20, cy - 15); ctx.moveTo(cx + 10, cy + 5); ctx.lineTo(cx + 20, cy + 5); ctx.stroke();
+                    break;
+            }
+        }
+
+        // --- Steuerungs-Logik ---
+        function nextCard() {
+            if (cards.length === 0) return;
+            currentIndex = (currentIndex + 1) % cards.length;
+            renderCard();
+        }
+
+        function prevCard() {
+            if (cards.length === 0) return;
+            currentIndex = (currentIndex - 1 + cards.length) % cards.length;
+            renderCard();
+        }
+
+        function shuffleCards() {
+            for (let i = cards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [cards[i], cards[j]] = [cards[j], cards[i]];
+            }
+            currentIndex = 0;
+            renderCard();
+        }
+
+        // --- Punkte-System ---
+        function changeScore(team, amount) {
+            scores[team] += amount;
+            if (scores[team] < 0) scores[team] = 0;
+            saveScores();
+            updateScoreDisplay();
+        }
+
+        function updateScoreDisplay() {
+            document.getElementById('scoreA').innerText = scores.A;
+            document.getElementById('scoreB').innerText = scores.B;
+        }
+
+        // --- Timer-Funktionen ---
+        function updateTimerDisplay() {
+            const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+            const s = (timeLeft % 60).toString().padStart(2, '0');
+            document.getElementById('timerDisplay').innerText = `${m}:${s}`;
+        }
+
+        function startTimer() {
+            if (timerInterval) return;
+            timerInterval = setInterval(() => {
+                if (timeLeft > 0) {
+                    timeLeft--;
+                    updateTimerDisplay();
+                } else {
+                    pauseTimer();
+                    alert("⏰ Die Zeit ist um! Das nächste Team ist dran.");
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            timeLeft = 60;
+            updateTimerDisplay();
+        }
+
+        // Start der App
+        init();
+    </script>
+</body>
+</html>
